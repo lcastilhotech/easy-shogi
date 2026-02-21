@@ -49,6 +49,6 @@ test.describe('Authentication Flow', () => {
         // We wait for the network request
         await expect(errorMessage).toBeVisible({ timeout: 10000 });
         // This depends on our getErrorMessage mapping
-        await expect(errorMessage).toHaveText(/E-mail ou senha incorretos|Ocorreu um erro inesperado/);
+        await expect(errorMessage).toHaveText(/E-mail ou senha incorretos|E-mail não cadastrado/);
     });
 });

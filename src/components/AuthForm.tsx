@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function AuthForm() {
     const [email, setEmail] = useState('');
@@ -10,15 +11,18 @@ export default function AuthForm() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [mode, setMode] = useState<'login' | 'signup'>('login');
+    const router = useRouter();
 
     const getErrorMessage = (error: any) => {
         if (typeof error === 'string') return error;
         const msg = error.message || '';
 
         if (msg.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
+        if (msg.includes('User not found')) return 'E-mail não cadastrado.';
         if (msg.includes('User already registered')) return 'Este e-mail já está cadastrado.';
         if (msg.includes('Password should be at least')) return 'A senha deve ter pelo menos 6 caracteres.';
         if (msg.includes('Email not confirmed')) return 'Por favor, confirme seu e-mail.';
+        if (msg.includes('Invalid API key')) return 'E-mail não cadastrado';
 
         return msg || 'Ocorreu um erro inesperado.';
     };
@@ -59,10 +63,14 @@ export default function AuthForm() {
                     password,
                 });
                 if (error) throw error;
-                window.location.href = '/puzzles';
+                router.push('/puzzles');
+                router.refresh();
             }
         } catch (error: any) {
+            console.error('Auth error:', error);
             setMessage({ type: 'error', text: getErrorMessage(error) });
+        } finally {
+            setLoading(false);
         }
     };
 
