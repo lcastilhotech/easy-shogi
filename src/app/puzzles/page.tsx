@@ -57,7 +57,7 @@ export default function PuzzlesPage() {
                     user_id: user.id,
                     puzzle_id: currentPuzzle.id,
                     status: 'completed',
-                    completed_at: new Error().toISOString(), // Fixed later: new Date().toISOString()
+                    completed_at: new Date().toISOString(),
                     attempts: 1 // Simplified
                 });
             }
