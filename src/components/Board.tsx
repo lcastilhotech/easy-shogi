@@ -68,6 +68,9 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
     const [selected, setSelected] = useState<{ x: number, y: number } | null>(null);
     const [selectedHand, setSelectedHand] = useState<{ kind: string, color: number } | null>(null);
     const [validMoves, setValidMoves] = useState<{ x: number, y: number }[]>([]);
+    const [version, setVersion] = useState(0);
+
+    const forceUpdate = () => setVersion(v => v + 1);
 
     useEffect(() => {
         setEngine(new ShogiEngine(initialSfen));
@@ -88,6 +91,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                 onDrop?.(selectedHand.kind, { x, y });
                 setSelectedHand(null);
                 setValidMoves([]);
+                forceUpdate();
             } else {
                 setSelectedHand(null);
                 setValidMoves([]);
@@ -106,6 +110,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                 onMove?.(selected, { x, y });
                 setSelected(null);
                 setValidMoves([]);
+                forceUpdate();
             } else {
                 // If selection is another of our pieces, switch selection
                 const piece = engine.getPieceAt(x, y);
@@ -139,15 +144,20 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
 
     return (
         <div className="flex flex-col md:flex-row items-center gap-8">
-            {/* White Hand (Top/Opponent) */}
-            <div className="hidden md:flex flex-col gap-2 p-4 zen-card bg-foreground/5 min-h-[200px] w-24">
-                <span className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mb-2">Gote</span>
-                {Object.entries(whiteHand).map(([kind, count]) => count > 0 && (
-                    <div key={kind} className="relative group cursor-not-allowed opacity-50">
-                        <div className="text-xl font-serif rotate-180">{PIECE_DATA[kind]?.kanji || kind}</div>
-                        <span className="absolute -bottom-1 -right-1 text-[10px] font-bold">{count}</span>
+            <div className="hidden md:flex flex-col gap-4">
+                <div className="p-4 zen-card bg-foreground/5 min-h-[160px] w-full md:w-32 border-foreground/10 border">
+                    <span className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mb-4 block text-center">Gote (Oponente)</span>
+                    <div className="flex md:flex-wrap gap-3 justify-center opacity-70 cursor-not-allowed">
+                        {Object.entries(whiteHand).map(([kind, count]) => count > 0 && (
+                            <div key={kind} className="relative w-12 h-14">
+                                <ShogiPieceComponent piece={{ kind, color: 1 }} kindStr={engine.getKindString(kind)} isSelected={false} />
+                                <span className="absolute -bottom-1 -right-1 bg-foreground/10 text-foreground/60 text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                                    {count}
+                                </span>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
 
             <div className="relative zen-border p-1 bg-foreground/5 shadow-2xl">
