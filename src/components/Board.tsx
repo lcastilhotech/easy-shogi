@@ -10,9 +10,19 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-const ShogiPieceComponent = ({ piece, kindStr, isSelected }: { piece: any, kindStr: string, isSelected?: boolean }) => {
+const ShogiPieceComponent = ({ piece, kindStr, isSelected, size = 'md', dimmed = false }: { piece: any, kindStr: string, isSelected?: boolean, size?: 'sm' | 'md' | 'lg', dimmed?: boolean }) => {
     const data = PIECE_DATA[kindStr];
     if (!data) return <div className="text-xs text-red-500">{kindStr}</div>;
+
+    const flipped = piece.color === 1;
+    const isPromoted = data.isPromoted;
+
+    const sizes = {
+        sm: { outer: 44, font: 'text-sm', sub: 'text-[7px]' },
+        md: { outer: 56, font: 'text-xl md:text-2xl', sub: 'text-[7px] md:text-[8px]' },
+        lg: { outer: 68, font: 'text-2xl md:text-3xl', sub: 'text-[8px] md:text-[9px]' }
+    };
+    const s = sizes[size];
 
     return (
         <motion.div
@@ -20,38 +30,44 @@ const ShogiPieceComponent = ({ piece, kindStr, isSelected }: { piece: any, kindS
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             className={cn(
-                "relative flex flex-col items-center justify-center w-full h-full select-none cursor-pointer group",
-                piece.color === 0 ? "rotate-0" : "rotate-180",
-                isSelected && "drop-shadow-[0_0_8px_rgba(184,136,101,0.6)]"
+                "relative flex flex-col items-center justify-center select-none cursor-pointer group transition-all duration-200",
+                flipped ? "rotate-180" : "rotate-0",
+                dimmed ? "opacity-40" : "opacity-100",
+                isSelected && "drop-shadow-[0_0_12px_rgba(245,158,11,0.6)]"
             )}
+            style={{ width: s.outer, height: s.outer }}
         >
-            <svg viewBox="0 0 100 120" className="w-[85%] h-[85%] drop-shadow-sm">
-                <path
-                    d="M50 5 L90 30 L85 110 L15 110 L10 30 Z"
-                    fill={isSelected ? "#F3E9D2" : "#FDFCF7"}
-                    stroke="#2D2D2D"
-                    strokeWidth="2"
-                />
+            <svg viewBox="0 0 100 115" className="w-[90%] h-[90%] drop-shadow-md">
+                <defs>
+                    <linearGradient id={`piece-grad-${kindStr}-${piece.color}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor={isSelected ? "#FEF3C7" : piece.color === 0 ? "#FDFAF3" : "#F5F0E8"} />
+                        <stop offset="100%" stopColor={isSelected ? "#FDE68A" : piece.color === 0 ? "#EDE5CC" : "#DDD5B8"} />
+                    </linearGradient>
+                </defs>
+                {/* Outer border */}
+                <path d="M50 4 L93 28 L88 108 L12 108 L7 28 Z" fill="#5C4207" />
+                {/* Main face */}
+                <path d="M50 7 L90 30 L85 105 L15 105 L10 30 Z" fill={`url(#piece-grad-${kindStr}-${piece.color})`} />
+                {/* Subtle detail */}
+                <path d="M50 7 L90 30" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" />
             </svg>
+
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
                 <span className={cn(
-                    "text-xl md:text-2xl font-serif ink-bleed leading-tight",
-                    data.isPromoted ? "text-red-700" : "text-[#1A1A1A]"
+                    "font-serif leading-tight",
+                    s.font,
+                    isPromoted ? "text-[#9B1C1C]" : "text-[#1C1008]"
                 )}>
                     {data.kanji}
                 </span>
-                <span className="text-[7px] md:text-[8px] uppercase tracking-tighter text-[#1A1A1A]/30 font-sans mt-0.5">
+                <span className={cn(
+                    "uppercase tracking-tighter font-sans mt-0.5",
+                    s.sub,
+                    isPromoted ? "text-[#9B1C1C]/50" : "text-[#1C1008]/40"
+                )}>
                     {data.namePt}
                 </span>
             </div>
-            {isSelected && (
-                <motion.div
-                    layoutId="selection-ring"
-                    className="absolute inset-0 border-2 border-accent rounded-sm pointer-events-none"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                />
-            )}
         </motion.div>
     );
 };
@@ -68,6 +84,8 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
     const [selected, setSelected] = useState<{ x: number, y: number } | null>(null);
     const [selectedHand, setSelectedHand] = useState<{ kind: string, color: number } | null>(null);
     const [validMoves, setValidMoves] = useState<{ x: number, y: number }[]>([]);
+    const [lastMove, setLastMove] = useState<{ from?: { x: number, y: number }, to: { x: number, y: number } } | null>(null);
+    const [captureFlash, setCaptureFlash] = useState<{ x: number, y: number } | null>(null);
     const [version, setVersion] = useState(0);
 
     const forceUpdate = () => setVersion(v => v + 1);
@@ -89,6 +107,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
             const success = engine.drop(selectedHand.kind, x, y);
             if (success) {
                 onDrop?.(selectedHand.kind, { x, y });
+                setLastMove({ to: { x, y } });
                 setSelectedHand(null);
                 setValidMoves([]);
                 forceUpdate();
@@ -102,12 +121,19 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
         if (selected) {
             if (selected.x === x && selected.y === y) {
                 setSelected(null);
+                setValidMoves([]);
                 return;
             }
 
+            const targetPiece = engine.getPieceAt(x, y);
             const success = engine.move(selected, { x, y });
             if (success) {
+                if (targetPiece) {
+                    setCaptureFlash({ x, y });
+                    setTimeout(() => setCaptureFlash(null), 400);
+                }
                 onMove?.(selected, { x, y });
+                setLastMove({ from: selected, to: { x, y } });
                 setSelected(null);
                 setValidMoves([]);
                 forceUpdate();
@@ -136,6 +162,8 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
 
     const handleHandClick = (kind: string, color: number) => {
         if (!interactive) return;
+        if (engine.getTurn() !== color) return;
+
         setSelectedHand({ kind, color });
         setSelected(null);
         const drops = engine.getValidDrops(color as 0 | 1).filter((m: any) => m.kind === kind).map((m: any) => m.to);
