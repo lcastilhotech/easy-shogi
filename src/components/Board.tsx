@@ -10,10 +10,9 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-const ShogiPieceComponent = ({ piece, isSelected }: { piece: any, isSelected?: boolean }) => {
-    // console.log('Rendering piece:', piece.kind, piece.color);
-    const data = PIECE_DATA[piece.kind];
-    if (!data) return <div className="text-xs">{piece.kind}</div>;
+const ShogiPieceComponent = ({ piece, kindStr, isSelected }: { piece: any, kindStr: string, isSelected?: boolean }) => {
+    const data = PIECE_DATA[kindStr];
+    if (!data) return <div className="text-xs text-red-500">{kindStr}</div>;
 
     return (
         <motion.div
@@ -134,7 +133,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
         if (!interactive) return;
         setSelectedHand({ kind, color });
         setSelected(null);
-        const drops = engine.getValidDrops(color).filter(m => m.kind === kind).map(m => m.to);
+        const drops = engine.getValidDrops(color as 0 | 1).filter((m: any) => m.kind === kind).map((m: any) => m.to);
         setValidMoves(drops);
     };
 
