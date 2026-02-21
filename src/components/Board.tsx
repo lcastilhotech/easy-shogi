@@ -10,6 +10,52 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+const ShogiPieceComponent = ({ piece, isSelected }: { piece: any, isSelected?: boolean }) => {
+    const data = PIECE_DATA[piece.kind];
+    if (!data) return <div className="text-xs">{piece.kind}</div>;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className={cn(
+                "relative flex flex-col items-center justify-center w-full h-full select-none cursor-pointer group",
+                piece.color === 0 ? "rotate-0" : "rotate-180",
+                isSelected && "drop-shadow-[0_0_8px_rgba(184,136,101,0.6)]"
+            )}
+        >
+            <svg viewBox="0 0 100 120" className="w-[85%] h-[85%] drop-shadow-sm">
+                <path
+                    d="M50 5 L90 30 L85 110 L15 110 L10 30 Z"
+                    fill={isSelected ? "#F3E9D2" : "#FDFCF7"}
+                    stroke="#2D2D2D"
+                    strokeWidth="2"
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
+                <span className={cn(
+                    "text-xl md:text-2xl font-serif ink-bleed leading-tight",
+                    data.isPromoted ? "text-red-700" : "text-[#1A1A1A]"
+                )}>
+                    {data.kanji}
+                </span>
+                <span className="text-[7px] md:text-[8px] uppercase tracking-tighter text-[#1A1A1A]/30 font-sans mt-0.5">
+                    {data.namePt}
+                </span>
+            </div>
+            {isSelected && (
+                <motion.div
+                    layoutId="selection-ring"
+                    className="absolute inset-0 border-2 border-accent rounded-sm pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                />
+            )}
+        </motion.div>
+    );
+};
+
 interface BoardProps {
     initialSfen?: string;
     onMove?: (from: { x: number, y: number }, to: { x: number, y: number }) => void;
@@ -116,24 +162,14 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                                 >
                                     <AnimatePresence mode="popLayout">
                                         {piece && (
-                                            <motion.div
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.8 }}
-                                                className={cn(
-                                                    "w-full h-full flex flex-col items-center justify-center select-none",
-                                                    piece.color === 0 ? "rotate-0" : "rotate-180"
-                                                )}
-                                            >
-                                                <div className="text-2xl md:text-3xl font-serif text-foreground ink-bleed leading-none">
-                                                    {PIECE_DATA[piece.kind]?.kanji || piece.kind}
-                                                </div>
-                                                <div className="text-[8px] md:text-[10px] uppercase tracking-tighter text-foreground/40 mt-1 font-sans">
-                                                    {PIECE_DATA[piece.kind]?.namePt}
-                                                </div>
-                                            </motion.div>
+                                            <ShogiPieceComponent piece={piece} isSelected={isSelected} />
                                         )}
                                     </AnimatePresence>
+
+                                    {/* Traditional intersection dots (Hoshi) */}
+                                    {((actualX === 7 || actualX === 4 || actualX === 1) && (actualY === 3 || actualY === 6 || actualY === 9)) && (
+                                        <div className="absolute w-1.5 h-1.5 rounded-full bg-foreground/10 pointer-events-none" />
+                                    )}
                                 </div>
                             );
                         })
@@ -141,24 +177,28 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                 </div>
             </div>
 
-            {/* Black Hand (Bottom/Player) */}
-            <div className="flex md:flex-col flex-wrap gap-4 md:gap-2 p-4 zen-card bg-foreground/5 md:min-h-[200px] md:w-24">
-                <span className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mb-2 w-full md:w-auto">Sente</span>
-                {Object.entries(blackHand).map(([kind, count]) => count > 0 && (
-                    <div
-                        key={kind}
-                        onClick={() => handleHandClick(kind, 0)}
-                        className={cn(
-                            "relative cursor-pointer transition-all hover:scale-110",
-                            selectedHand?.kind === kind && "scale-125 text-accent ink-bleed"
-                        )}
-                    >
-                        <div className="text-2xl md:text-3xl font-serif">{PIECE_DATA[kind]?.kanji || kind}</div>
-                        <span className="absolute -bottom-1 -right-1 bg-accent text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                            {count}
-                        </span>
+            {/* Black Hand (Sente) - Traditional Koma-dai style */}
+            <div className="flex flex-col gap-4">
+                <div className="p-4 zen-card bg-[#E3D5B1]/30 border-[#B88865]/20 border min-h-[160px] w-full md:w-32 shadow-inner">
+                    <span className="text-[10px] uppercase tracking-widest text-[#B88865] font-bold mb-4 block text-center">Sente (Sua Mão)</span>
+                    <div className="flex md:flex-wrap gap-3 justify-center">
+                        {Object.entries(blackHand).map(([kind, count]) => count > 0 && (
+                            <div
+                                key={kind}
+                                onClick={() => handleHandClick(kind, 0)}
+                                className={cn(
+                                    "relative w-12 h-14 transition-transform hover:-translate-y-1 active:scale-95",
+                                    selectedHand?.kind === kind && "scale-110 drop-shadow-lg"
+                                )}
+                            >
+                                <ShogiPieceComponent piece={{ kind, color: 0 }} isSelected={selectedHand?.kind === kind} />
+                                <span className="absolute -bottom-1 -right-1 bg-accent text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-white border">
+                                    {count}
+                                </span>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </div>
             </div>
         </div>
     );

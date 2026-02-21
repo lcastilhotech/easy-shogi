@@ -12,20 +12,20 @@ export interface ShogiPiece {
 }
 
 export const PIECE_DATA: Record<string, Omit<ShogiPiece, 'symbol'>> = {
-    'K': { namePt: 'Rei', nameJp: 'Gyoku', kanji: '玉', isPromoted: false, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]] },
-    'R': { namePt: 'Torre', nameJp: 'Hisha', kanji: '飛', isPromoted: false, movePattern: [[0, -1], [0, 1], [-1, 0], [1, 0]] },
-    'B': { namePt: 'Bispo', nameJp: 'Kakugyo', kanji: '角', isPromoted: false, movePattern: [[-1, -1], [1, -1], [-1, 1], [1, 1]] },
-    'G': { namePt: 'General de Ouro', nameJp: 'Kinsho', kanji: '金', isPromoted: false, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
-    'S': { namePt: 'General de Prata', nameJp: 'Ginsho', kanji: '銀', isPromoted: false, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 1], [1, 1]] },
-    'N': { namePt: 'Cavaleiro', nameJp: 'Keima', kanji: '桂', isPromoted: false, movePattern: [[-1, -2], [1, -2]] },
-    'L': { namePt: 'Lanceiro', nameJp: 'Kyosha', kanji: '香', isPromoted: false, movePattern: [[0, -1]] },
-    'P': { namePt: 'Peão', nameJp: 'Fuhyo', kanji: '歩', isPromoted: false, movePattern: [[0, -1]] },
-    '+R': { namePt: 'Dragão Rei', nameJp: 'Ryuo', kanji: '龍', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]] },
-    '+B': { namePt: 'Cavalo Dragão', nameJp: 'Ryuma', kanji: '馬', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]] },
-    '+S': { namePt: 'Prata Promovida', nameJp: 'Narigin', kanji: '全', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
-    '+N': { namePt: 'Cavaleiro Promovido', nameJp: 'Narikei', kanji: '圭', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
-    '+L': { namePt: 'Lanceiro Promovido', nameJp: 'Narikyo', kanji: '杏', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
-    '+P': { namePt: 'Peão Promovido', nameJp: 'Tokin', kanji: 'と', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
+    'OU': { namePt: 'Rei', nameJp: 'Gyoku', kanji: '玉', isPromoted: false, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]] },
+    'HI': { namePt: 'Torre', nameJp: 'Hisha', kanji: '飛', isPromoted: false, movePattern: [[0, -1], [0, 1], [-1, 0], [1, 0]] },
+    'KA': { namePt: 'Bispo', nameJp: 'Kakugyo', kanji: '角', isPromoted: false, movePattern: [[-1, -1], [1, -1], [-1, 1], [1, 1]] },
+    'KI': { namePt: 'General de Ouro', nameJp: 'Kinsho', kanji: '金', isPromoted: false, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
+    'GI': { namePt: 'General de Prata', nameJp: 'Ginsho', kanji: '銀', isPromoted: false, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 1], [1, 1]] },
+    'KE': { namePt: 'Cavaleiro', nameJp: 'Keima', kanji: '桂', isPromoted: false, movePattern: [[-1, -2], [1, -2]] },
+    'KY': { namePt: 'Lanceiro', nameJp: 'Kyosha', kanji: '香', isPromoted: false, movePattern: [[0, -1]] },
+    'FU': { namePt: 'Peão', nameJp: 'Fuhyo', kanji: '歩', isPromoted: false, movePattern: [[0, -1]] },
+    'RY': { namePt: 'Dragão Rei', nameJp: 'Ryuo', kanji: '龍', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]] },
+    'UM': { namePt: 'Cavalo Dragão', nameJp: 'Ryuma', kanji: '馬', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]] },
+    'NG': { namePt: 'Prata Promovida', nameJp: 'Narigin', kanji: '全', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
+    'NK': { namePt: 'Cavaleiro Promovido', nameJp: 'Narikei', kanji: '圭', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
+    'NY': { namePt: 'Lanceiro Promovido', nameJp: 'Narikyo', kanji: '杏', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
+    'TO': { namePt: 'Peão Promovido', nameJp: 'Tokin', kanji: 'と', isPromoted: true, movePattern: [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]] },
 };
 
 export class ShogiEngine {
@@ -65,10 +65,13 @@ export class ShogiEngine {
 
     drop(pieceKind: string, toX: number, toY: number) {
         try {
-            // shogi.js Kind is internal, we need to map our string symbols if necessary
-            // or just pass through if its already Kind strings like "FU", "GI", etc.
-            // Based on d.ts, it expects Kind.
-            this.game.drop(toX, toY, pieceKind as any);
+            // Map our SFEN/simplified symbols to shogi.js Kind strings if they are single letters
+            const kindMap: Record<string, string> = {
+                'G': 'KI', 'S': 'GI', 'N': 'KE', 'L': 'KY', 'P': 'FU', 'R': 'HI', 'B': 'KA'
+            };
+            const mappedKind = kindMap[pieceKind] || pieceKind;
+
+            this.game.drop(toX, toY, mappedKind as any);
             return true;
         } catch (e) {
             console.error('Drop error:', e);

@@ -13,6 +13,8 @@ export default function PuzzlesPage() {
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
+    const [showSolution, setShowSolution] = useState(false);
+    const [hintsUsed, setHintsUsed] = useState(0);
 
     useEffect(() => {
         async function initialize() {
@@ -135,27 +137,67 @@ export default function PuzzlesPage() {
                     </AnimatePresence>
                 </div>
 
-                <aside className="max-w-xs space-y-12">
-                    <div className="space-y-4">
-                        <h3 className="text-xs uppercase tracking-widest text-foreground/40 font-bold">Dica</h3>
-                        <p className="text-lg text-foreground/80 font-serif leading-relaxed italic">
-                            {currentPuzzle.hint || "O movimento sutil muitas vezes decide o destino do Rei."}
-                        </p>
+                <aside className="max-w-md w-full lg:w-80 space-y-8">
+                    <div className="zen-card p-6 bg-foreground/5 space-y-6">
+                        <section className="space-y-4">
+                            <h3 className="text-[10px] uppercase tracking-[0.2em] text-accent font-bold">Desafio</h3>
+                            <p className="text-xl font-serif text-foreground leading-tight">
+                                {currentPuzzle.description}
+                            </p>
+                        </section>
+
+                        <section className="space-y-3 pt-4 border-t border-foreground/10">
+                            <h3 className="text-[10px] uppercase tracking-[0.2em] text-foreground/40 font-bold">Dica Mestra</h3>
+                            <p className="text-sm text-foreground/70 font-serif italic leading-relaxed">
+                                "{currentPuzzle.hint}"
+                            </p>
+                        </section>
+
+                        <div className="pt-4 flex flex-col gap-3">
+                            <button
+                                onClick={() => setShowSolution(!showSolution)}
+                                className="text-[10px] uppercase tracking-widest text-foreground/40 hover:text-accent font-bold transition-colors text-left"
+                            >
+                                {showSolution ? 'Esconder Solução' : 'Ver Solução (Desperdiçar Honra)'}
+                            </button>
+
+                            <AnimatePresence>
+                                {showSolution && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="text-xs font-mono bg-accent/10 p-2 rounded text-accent"
+                                    >
+                                        Solução: {currentPuzzle.solution.join(', ')}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
 
-                    {status === 'success' && (
-                        <motion.button
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            onClick={() => {
-                                setStatus('idle');
-                                setCurrentPuzzleIndex((prev) => (prev + 1) % puzzles.length);
-                            }}
-                            className="w-full zen-card bg-foreground text-background py-5 text-xl font-serif"
-                        >
-                            Próximo Desafio →
-                        </motion.button>
-                    )}
+                    <div className="flex flex-col gap-4">
+                        {status === 'success' ? (
+                            <motion.button
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                onClick={() => {
+                                    setStatus('idle');
+                                    setShowSolution(false);
+                                    setCurrentPuzzleIndex((prev) => (prev + 1) % puzzles.length);
+                                }}
+                                className="w-full zen-card bg-foreground text-background py-5 text-xl font-serif hover:bg-accent transition-colors shadow-lg"
+                            >
+                                Próximo Desafio →
+                            </motion.button>
+                        ) : (
+                            <div className="text-center p-4 border border-dashed border-foreground/10 rounded-sm">
+                                <p className="text-[10px] uppercase tracking-widest text-foreground/30 font-bold">
+                                    Aguardando seu movimento...
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </aside>
             </main>
         </div>
