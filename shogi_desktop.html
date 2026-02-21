@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>将棋 · Guia de Shogi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0f0a04;
+  --surface:  #1c1208;
+  --card:     #fdf8ee;
+  --card2:    #f7f0dc;
+  --ink:      #1a0e02;
+  --gold:     #c9940a;
+  --gold2:    #e8b84b;
+  --wood:     #8b5e2a;
+  --wood2:    #c8965a;
+  --red:      #b02a1e;
+  --green:    #1e7a3e;
+  --blue:     #1e4d8c;
+  --border:   rgba(201,148,10,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,148,10,0.08), transparent),
+    repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(201,148,10,0.04) 59px, rgba(201,148,10,0.04) 60px),
+    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(201,148,10,0.04) 59px, rgba(201,148,10,0.04) 60px);
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: 'EB Garamond', Georgia, serif;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(180deg, #1c1208 0%, #0f0a04 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 60px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(12px);
+}
+
+.header-left h1 {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 2rem;
+  color: var(--gold2);
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 40px rgba(201,148,10,0.4);
+}
+
+.header-left p {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.9rem;
+  color: rgba(201,148,10,0.6);
+  margin-top: 4px;
+  letter-spacing: 0.15em;
+}
+
+.header-kanji {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 4rem;
+  color: rgba(201,148,10,0.15);
+  line-height: 1;
+  user-select: none;
+}
+
+.header-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  color: rgba(245,236,215,0.6);
+  letter-spacing: 0.08em;
+}
+
+.ldot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── SECTION TITLES ── */
+.section-wrap {
+  padding: 40px 60px;
+}
+
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.section-title::before,
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,148,10,0.4), transparent);
+}
+
+/* ── GRID ── */
+.pieces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+/* ── PIECE CARD ── */
+.card {
+  background: var(--card);
+  border-radius: 18px;
+  border: 1px solid rgba(200,150,90,0.25);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.8);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.card-accent {
+  height: 4px;
+  background: linear-gradient(90deg, var(--wood), var(--gold), var(--wood2), var(--gold));
+}
+
+.card-accent.green { background: linear-gradient(90deg, #1e7a3e, #27ae60, #2ecc71, #27ae60); }
+
+.card-body {
+  padding: 20px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+/* ── PIECE TILE ── */
+.piece-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.piece-svg-wrap {
+  position: relative;
+  width: 90px;
+  height: 104px;
+  filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.35));
+  transition: filter 0.2s;
+}
+
+.card:hover .piece-svg-wrap {
+  filter: drop-shadow(3px 6px 14px rgba(0,0,0,0.5));
+}
+
+.piece-svg-wrap svg { width: 100%; height: 100%; }
+
+.piece-kanji-overlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -46%);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a0e02;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.piece-kanji-overlay.red { color: #b02a1e; }
+
+/* ── MINI BOARD ── */
+.mini-board {
+  display: grid;
+  grid-template-columns: repeat(5, 28px);
+  grid-template-rows: repeat(5, 28px);
+  border: 2px solid var(--wood);
+  background: #b8895a;
+  gap: 1px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.cell {
+  width: 28px; height: 28px;
+  background: #dfc49a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell.move { background: rgba(30,77,140,0.45); }
+.cell.origin { background: #c8965a; }
+
+.move-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #3a7bd5;
+  box-shadow: 0 0 6px rgba(58,123,213,0.7);
+}
+
+.origin-icon {
+  font-size: 1rem;
+  color: #1a0e02;
+  line-height: 1;
+}
+
+/* ── CARD INFO ── */
+.card-info { flex: 1; min-width: 0; }
+
+.card-info-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.name-pt {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--wood);
+  line-height: 1.2;
+}
+
+.name-jp {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 3px;
+}
+
+.name-rom {
+  font-size: 0.78rem;
+  color: #bbb;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.badge {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-can { background: var(--green); color: #fff; }
+.badge-no  { background: var(--red); color: #fff; }
+.badge-is  { background: #1e7a3e; color: #fff; }
+
+.desc {
+  font-size: 0.84rem;
+  line-height: 1.75;
+  color: #444;
+  background: rgba(200,150,90,0.07);
+  border-radius: 8px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--wood2);
+  margin-top: 8px;
+}
+
+/* ── RULES SECTION ── */
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.rule-card {
+  background: var(--card);
+  border-radius: 14px;
+  border: 1px solid rgba(200,150,90,0.2);
+  padding: 18px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.rule-card h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  color: var(--wood);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rule-icon {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--wood2), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.rule-card p {
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: #444;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 32px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: rgba(201,148,10,0.35);
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>将棋 · SHOGI</h1>
+    <p>将棋完全ガイド · Guia Completo das Peças</p>
+  </div>
+  <div class="header-kanji">将棋</div>
+  <div class="header-legend">
+    <div class="legend-item"><span class="ldot" style="background:#3a7bd5"></span>Casa de movimento</div>
+    <div class="legend-item"><span class="ldot" style="background:#c8965a"></span>Posição da peça</div>
+    <div class="legend-item"><span class="ldot" style="background:#1e7a3e"></span>Peça promovida</div>
+    <div class="legend-item"><span class="ldot" style="background:#b02a1e"></span>Não promove</div>
+  </div>
+</header>
+
+<div class="section-wrap">
+  <div class="section-title">Peças Básicas</div>
+  <div class="pieces-grid" id="basic-grid"></div>
+</div>
+
+<div class="section-wrap" style="padding-top:0">
+  <div class="section-title">Peças Promovidas</div>
+  <div class="pieces-grid" id="promoted-grid"></div>
+</div>
+
+<div class="section-wrap" style="padding-top:0">
+  <div class="section-title">Regras Essenciais</div>
+  <div class="rules-grid" id="rules-grid"></div>
+</div>
+
+<footer>将棋 · O Xadrez Japonês · Shogi Complete Guide</footer>
+
+<script>
+const pieces = [
+  { namePT:"Rei", nameJP:"玉将 / 王将", nameRom:"Gyoku-shō / Ō-shō", kanji:"王", canPromote:false, isPromoted:false,
+    moves:[[1,1],[1,2],[1,3],[2,1],[2,3],[3,1],[3,2],[3,3]],
+    desc:"Move-se <strong>1 casa em qualquer direção</strong> — as 8 casas ao redor. A peça mais importante: sua captura encerra imediatamente o jogo. Deve ser protegido a todo custo. <em>Não pode ser promovido.</em>" },
+  { namePT:"Torre", nameJP:"飛車", nameRom:"Hisha", kanji:"飛", canPromote:true, isPromoted:false,
+    moves:[[0,2],[1,2],[2,0],[2,1],[2,3],[2,4],[3,2],[4,2]],
+    desc:"Move-se <strong>qualquer número de casas na horizontal ou vertical</strong> (como a torre do xadrez ocidental). Uma das peças mais poderosas do jogo. Ao promover, torna-se o <strong>Dragão (竜王)</strong>." },
+  { namePT:"Bispo", nameJP:"角行", nameRom:"Kakugyō", kanji:"角", canPromote:true, isPromoted:false,
+    moves:[[0,0],[0,4],[1,1],[1,3],[3,1],[3,3],[4,0],[4,4]],
+    desc:"Move-se <strong>qualquer número de casas na diagonal</strong> (como o bispo do xadrez ocidental). Domina as diagonais, mas não acessa linhas retas. Ao promover, torna-se o <strong>Cavalo Voador (竜馬)</strong>." },
+  { namePT:"General de Ouro", nameJP:"金将", nameRom:"Kinshō", kanji:"金", canPromote:false, isPromoted:false,
+    moves:[[1,1],[1,2],[1,3],[2,1],[2,3],[3,2]],
+    desc:"Move-se <strong>1 casa: frente, lados, diagonal dianteira ou para trás em linha reta</strong>. Não vai na diagonal traseira. Peça sólida e versátil para defesa. <em>Não pode ser promovido.</em>" },
+  { namePT:"General de Prata", nameJP:"銀将", nameRom:"Ginshō", kanji:"銀", canPromote:true, isPromoted:false,
+    moves:[[1,1],[1,2],[1,3],[3,1],[3,3]],
+    desc:"Move-se <strong>1 casa: para frente ou nas 4 diagonais</strong>. Não vai para os lados nem para trás em linha reta. Bom para ataques diagonais. Ao promover, move-se como o General de Ouro." },
+  { namePT:"Cavalo", nameJP:"桂馬", nameRom:"Keima", kanji:"桂", canPromote:true, isPromoted:false,
+    moves:[[0,1],[0,3]],
+    desc:"Salta em \"L\": <strong>2 casas à frente + 1 para o lado</strong>. É a <strong>única peça que salta sobre outras</strong>. Só pode mover para frente. Ao promover, move-se como o General de Ouro." },
+  { namePT:"Lança", nameJP:"香車", nameRom:"Kyōsha", kanji:"香", canPromote:true, isPromoted:false,
+    moves:[[0,2],[1,2]],
+    desc:"Move-se <strong>qualquer número de casas para frente</strong> em linha reta, sem desviar. Não pode recuar nem ir para os lados. Útil para pressionar colunas. Ao promover, move-se como o General de Ouro." },
+  { namePT:"Peão", nameJP:"歩兵", nameRom:"Fuhyō", kanji:"歩", canPromote:true, isPromoted:false,
+    moves:[[1,2]],
+    desc:"Move-se (e captura) <strong>1 casa para frente</strong>. Cada jogador começa com <strong>9 peões</strong>. Pequenos, mas estratégicos. Ao promover, vira <strong>と金 (Tokin)</strong> — move-se como o General de Ouro." },
+];
+
+const promoted = [
+  { namePT:"Dragão", nameJP:"竜王", nameRom:"Ryūō", kanji:"龍", canPromote:false, isPromoted:true,
+    moves:[[0,2],[1,2],[2,0],[2,1],[2,3],[2,4],[3,2],[4,2],[1,1],[1,3],[3,1],[3,3]],
+    desc:"<strong>Torre promovida.</strong> Combina o alcance ilimitado da Torre (<strong>horizontal e vertical</strong>) com a capacidade de mover <strong>1 casa em qualquer diagonal</strong>. Uma das peças mais devastadoras do jogo." },
+  { namePT:"Cavalo Voador", nameJP:"竜馬", nameRom:"Ryūma", kanji:"馬", canPromote:false, isPromoted:true,
+    moves:[[0,0],[0,4],[1,1],[1,3],[3,1],[3,3],[4,0],[4,4],[1,2],[2,1],[2,3],[3,2]],
+    desc:"<strong>Bispo promovido.</strong> Combina o alcance ilimitado do Bispo (<strong>todas as diagonais</strong>) com a capacidade de mover <strong>1 casa na horizontal ou vertical</strong>. Extremamente versátil." },
+  { namePT:"と金 · Tokin", nameJP:"と金", nameRom:"Tokin", kanji:"と", canPromote:false, isPromoted:true,
+    moves:[[1,1],[1,2],[1,3],[2,1],[2,3],[3,2]],
+    desc:"<strong>Peão promovido.</strong> Move-se exatamente como o <strong>General de Ouro</strong>. Um dos maiores ganhos de valor por promoção — um simples peão torna-se peça central de ataque e defesa." },
+  { namePT:"Prata Promovida", nameJP:"成銀", nameRom:"Narigin", kanji:"全", canPromote:false, isPromoted:true,
+    moves:[[1,1],[1,2],[1,3],[2,1],[2,3],[3,2]],
+    desc:"<strong>Prata promovida.</strong> Move-se como o <strong>General de Ouro</strong>. Ganha mobilidade para os lados e para trás em linha reta, corrigindo as limitações originais da Prata." },
+  { namePT:"Cavalo Promovido", nameJP:"成桂", nameRom:"Narikei", kanji:"今", canPromote:false, isPromoted:true,
+    moves:[[1,1],[1,2],[1,3],[2,1],[2,3],[3,2]],
+    desc:"<strong>Cavalo promovido.</strong> Move-se como o <strong>General de Ouro</strong>. Abandona o salto em L — ganha grande mobilidade em todas as direções relevantes." },
+  { namePT:"Lança Promovida", nameJP:"成香", nameRom:"Narikyo", kanji:"仝", canPromote:false, isPromoted:true,
+    moves:[[1,1],[1,2],[1,3],[2,1],[2,3],[3,2]],
+    desc:"<strong>Lança promovida.</strong> Move-se como o <strong>General de Ouro</strong>. A lança que só avançava agora pode recuar e ir para os lados — transformação de mobilidade radical." },
+];
+
+const rules = [
+  { icon:"🎯", title:"Objetivo", text:"Capturar o Rei adversário (王将 / 玉将). O jogo termina quando o Rei não consegue escapar do xeque em nenhuma jogada — situação chamada de <em>tsumi</em> (詰み), equivalente ao xeque-mate." },
+  { icon:"↩️", title:"Soltar peças capturadas", text:"Toda peça capturada vai para a sua mão. No seu turno, em vez de mover uma peça do tabuleiro, você pode <strong>soltar</strong> qualquer peça da mão em uma casa vazia. Peças promovidas retornam ao estado básico quando capturadas." },
+  { icon:"⬆️", title:"Zona de promoção", text:"As <strong>3 fileiras mais distantes</strong> (do seu lado) formam a zona inimiga. Ao entrar, mover-se dentro ou sair dessa zona, a peça <em>pode</em> ser promovida. A promoção é obrigatória quando a peça ficaria sem movimentos futuros." },
+  { icon:"🚫", title:"Restrições do Peão", text:"É proibido soltar um peão na <strong>mesma coluna</strong> onde já há outro seu. Também é proibido dar <strong>xeque-mate soltando um peão</strong> (<em>uchifuzume</em>) — mas dar xeque com peão é permitido." },
+  { icon:"🔄", title:"Empate · Sennichite", text:"Se a <strong>mesma posição se repetir 4 vezes</strong> com o mesmo jogador a mover, a partida é declarada empate. Xeques perpétuos resultam em <strong>derrota para quem os dá</strong>." },
+];
+
+function buildPieceSVG(kanji, isPromoted, size=90) {
+  const h = Math.round(size * 60/52);
+  const fill1 = isPromoted ? "#fff5f5" : "#fffae8";
+  const fill2 = isPromoted ? "#ffd0d0" : "#e8d5a0";
+  const stroke = isPromoted ? "#b02a1e" : "#7a4e1e";
+  const id = `g-${kanji}-${isPromoted}`;
+  return `
+    <div class="piece-svg-wrap" style="width:${size}px;height:${h}px">
+      <svg viewBox="0 0 52 60" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${fill1}"/>
+            <stop offset="100%" stop-color="${fill2}"/>
+          </linearGradient>
+        </defs>
+        <polygon points="26,3 49,15 49,57 3,57 3,15" fill="url(#${id})" stroke="${stroke}" stroke-width="2.5"/>
+        <polygon points="26,6 46,16 46,54 6,54 6,16" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
+      </svg>
+      <div class="piece-kanji-overlay${isPromoted?' red':''}">${kanji}</div>
+    </div>`;
+}
+
+function buildBoard(moves) {
+  let html = '<div class="mini-board">';
+  for (let r=0; r<5; r++) {
+    for (let c=0; c<5; c++) {
+      const isOrigin = r===2 && c===2;
+      const isMove = moves.some(([mr,mc]) => mr===r && mc===c);
+      html += `<div class="cell${isOrigin?' origin':isMove?' move':''}">`;
+      if (isOrigin) html += `<div class="origin-icon">⬡</div>`;
+      else if (isMove) html += `<div class="move-dot"></div>`;
+      html += '</div>';
+    }
+  }
+  return html + '</div>';
+}
+
+function buildCard(p) {
+  const badgeClass = p.isPromoted ? 'badge-is' : p.canPromote ? 'badge-can' : 'badge-no';
+  const badgeText = p.isPromoted ? '✓ Promovida' : p.canPromote ? 'Pode promover' : 'Não promove';
+  return `
+  <div class="card">
+    <div class="card-accent${p.isPromoted?' green':''}"></div>
+    <div class="card-body">
+      <div class="piece-wrap">
+        ${buildPieceSVG(p.kanji, p.isPromoted)}
+        ${buildBoard(p.moves)}
+      </div>
+      <div class="card-info">
+        <div class="card-info-header">
+          <div>
+            <div class="name-pt">${p.namePT}</div>
+            <div class="name-jp">${p.nameJP}</div>
+            <div class="name-rom">${p.nameRom}</div>
+          </div>
+          <span class="badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="desc">${p.desc}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('basic-grid').innerHTML = pieces.map(buildCard).join('');
+document.getElementById('promoted-grid').innerHTML = promoted.map(buildCard).join('');
+document.getElementById('rules-grid').innerHTML = rules.map(r => `
+  <div class="rule-card">
+    <h3><span class="rule-icon">${r.icon}</span>${r.title}</h3>
+    <p>${r.text}</p>
+  </div>`).join('');
+</script>
+</body>
+</html>

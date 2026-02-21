@@ -11,6 +11,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const ShogiPieceComponent = ({ piece, isSelected }: { piece: any, isSelected?: boolean }) => {
+    // console.log('Rendering piece:', piece.kind, piece.color);
     const data = PIECE_DATA[piece.kind];
     if (!data) return <div className="text-xs">{piece.kind}</div>;
 
@@ -67,6 +68,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
     const [engine, setEngine] = useState<ShogiEngine | null>(null);
     const [selected, setSelected] = useState<{ x: number, y: number } | null>(null);
     const [selectedHand, setSelectedHand] = useState<{ kind: string, color: number } | null>(null);
+    const [validMoves, setValidMoves] = useState<{ x: number, y: number }[]>([]);
 
     useEffect(() => {
         setEngine(new ShogiEngine(initialSfen));
@@ -86,8 +88,10 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
             if (success) {
                 onDrop?.(selectedHand.kind, { x, y });
                 setSelectedHand(null);
+                setValidMoves([]);
             } else {
                 setSelectedHand(null);
+                setValidMoves([]);
             }
             return;
         }
@@ -102,20 +106,26 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
             if (success) {
                 onMove?.(selected, { x, y });
                 setSelected(null);
+                setValidMoves([]);
             } else {
                 // If selection is another of our pieces, switch selection
                 const piece = engine.getPieceAt(x, y);
-                if (piece) {
+                if (piece && piece.color === engine.getTurn()) {
                     setSelected({ x, y });
+                    const moves = engine.getValidMoves(x, y).map(m => m.to);
+                    setValidMoves(moves);
                 } else {
                     setSelected(null);
+                    setValidMoves([]);
                 }
             }
         } else {
             const piece = engine.getPieceAt(x, y);
-            if (piece) {
+            if (piece && piece.color === engine.getTurn()) {
                 setSelected({ x, y });
                 setSelectedHand(null);
+                const moves = engine.getValidMoves(x, y).map(m => m.to);
+                setValidMoves(moves);
             }
         }
     };
@@ -124,6 +134,8 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
         if (!interactive) return;
         setSelectedHand({ kind, color });
         setSelected(null);
+        const drops = engine.getValidDrops(color).filter(m => m.kind === kind).map(m => m.to);
+        setValidMoves(drops);
     };
 
     return (
@@ -149,6 +161,8 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                             const actualY = y + 1;
                             const piece = engine.getPieceAt(actualX, actualY);
                             const isSelected = selected?.x === actualX && selected?.y === actualY;
+                            const isValidMove = validMoves.some(m => m.x === actualX && m.y === actualY);
+                            const kindStr = piece ? engine.getKindString(piece.kind) : '';
 
                             return (
                                 <div
@@ -157,12 +171,19 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                                     className={cn(
                                         "w-10 h-12 md:w-14 md:h-16 flex items-center justify-center cursor-pointer transition-colors relative",
                                         "bg-[#FDFCF7]", // Paper square
-                                        isSelected && "bg-accent/10 sm:bg-accent/20"
+                                        isSelected && "bg-accent/10 sm:bg-accent/20",
+                                        isValidMove && "bg-blue-500/10"
                                     )}
                                 >
+                                    {isValidMove && (
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div className="w-2 h-2 rounded-full bg-blue-400/40 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                        </div>
+                                    )}
+
                                     <AnimatePresence mode="popLayout">
                                         {piece && (
-                                            <ShogiPieceComponent piece={piece} isSelected={isSelected} />
+                                            <ShogiPieceComponent piece={piece} kindStr={kindStr} isSelected={isSelected} />
                                         )}
                                     </AnimatePresence>
 
@@ -191,7 +212,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
                                     selectedHand?.kind === kind && "scale-110 drop-shadow-lg"
                                 )}
                             >
-                                <ShogiPieceComponent piece={{ kind, color: 0 }} isSelected={selectedHand?.kind === kind} />
+                                <ShogiPieceComponent piece={{ kind, color: 0 }} kindStr={engine.getKindString(kind)} isSelected={selectedHand?.kind === kind} />
                                 <span className="absolute -bottom-1 -right-1 bg-accent text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border-white border">
                                     {count}
                                 </span>

@@ -82,4 +82,25 @@ export class ShogiEngine {
     getTurn() {
         return this.game.turn;
     }
+
+    getKindString(kind: any): string {
+        const kinds = ["FU", "KY", "KE", "GI", "KI", "KA", "HI", "OU", "TO", "NY", "NK", "NG", "UM", "RY"];
+        return typeof kind === 'number' ? kinds[kind] : kind;
+    }
+
+    getValidMoves(x: number, y: number) {
+        try {
+            return this.game.getMovesFrom(x, y);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    getValidDrops(color: 0 | 1) {
+        try {
+            return this.game.getDropsBy(color);
+        } catch (e) {
+            return [];
+        }
+    }
 }
