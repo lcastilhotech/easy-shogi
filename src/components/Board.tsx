@@ -66,7 +66,7 @@ const ShogiPieceComponent = ({ piece, kindStr, isSelected, dimmed = false }: { p
                         isPromoted ? "text-[#9B1C1C]/50" : "text-[#1C1008]/40"
                     )}
                 >
-                    {data.namePt || data.name}
+                    {data.namePt}
                 </span>
             </div>
 
