@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F9F8F1; /* Paper White */
+  --foreground: #1A1A1A; /* Sumi Ink */
+  --accent: #E63946;     /* Vermilion Red */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui;
+  --font-serif: var(--font-noto-serif-jp), ui-serif, Georgia;
+
+  --radius-none: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .kanji {
+  font-family: var(--font-serif);
+}
+
+/* Zen UI Utilities */
+.zen-border {
+  border: 1px solid var(--foreground);
+}
+
+.zen-card {
+  background: white;
+  border: 1px solid var(--foreground);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zen-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 4px 4px 0px var(--foreground);
+}
+
+.ink-bleed {
+  filter: url(#ink-filter);
+}

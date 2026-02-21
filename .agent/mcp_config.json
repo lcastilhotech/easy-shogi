@@ -1,0 +1,29 @@
+{
+    "mcpServers": {
+        "context7": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@upstash/context7-mcp",
+                "--api-key",
+                "YOUR_API_KEY"
+            ]
+        },
+        "shadcn": {
+            "command": "npx",
+            "args": [
+                "shadcn@latest",
+                "mcp"
+            ]
+        },
+        "supabase": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@thefoot/mcp-stdio-http-bridge",
+                "https://mcp.supabase.com/mcp?project_ref=bbbjotkqwyhpyitkevud"
+            ]
+        }
+    }
+}
+// setup mcp server in  ~/.gemini\antigravity\mcp_config.json
