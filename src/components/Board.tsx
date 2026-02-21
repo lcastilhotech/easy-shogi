@@ -17,7 +17,7 @@ interface BoardProps {
     onDrop?: (pieceKind: string, to: { x: number, y: number }) => void;
 }
 
-export default function Board({ initialSfen, onMove, interactive = true }: BoardProps) {
+export default function Board({ initialSfen, onMove, onDrop, interactive = true }: BoardProps) {
     const [engine, setEngine] = useState<ShogiEngine | null>(null);
     const [selected, setSelected] = useState<{ x: number, y: number } | null>(null);
     const [selectedHand, setSelectedHand] = useState<{ kind: string, color: number } | null>(null);

@@ -5,15 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Board from '@/components/Board';
 import { motion, AnimatePresence } from 'framer-motion';
-import { INITIAL_PUZZLES } from '@/data/puzzles';
-
-interface Puzzle {
-    id: string;
-    title: string;
-    sfen: string;
-    solution: string[];
-    difficulty: number;
-}
+import { INITIAL_PUZZLES, type Puzzle } from '@/data/puzzles';
 
 export default function PuzzlesPage() {
     const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
