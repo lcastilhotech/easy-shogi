@@ -179,7 +179,7 @@ export default function Board({ initialSfen, onMove, onDrop, interactive = true 
     const colLabels = ["9", "8", "7", "6", "5", "4", "3", "2", "1"];
     const rowLabels = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
-    const isValidMove = useCallback((r: number, c: number) => validMoves.some(m => m.x === r && m.y === c), [validMoves]);
+    const isValidMove = (r: number, c: number) => validMoves.some(m => m.x === r && m.y === c);
 
     const handleSquareClick = (x: number, y: number) => {
         if (!interactive) return;
