@@ -11,10 +11,39 @@ export default function AuthForm() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [mode, setMode] = useState<'login' | 'signup'>('login');
 
+    const getErrorMessage = (error: any) => {
+        if (typeof error === 'string') return error;
+        const msg = error.message || '';
+
+        if (msg.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
+        if (msg.includes('User already registered')) return 'Este e-mail já está cadastrado.';
+        if (msg.includes('Password should be at least')) return 'A senha deve ter pelo menos 6 caracteres.';
+        if (msg.includes('Email not confirmed')) return 'Por favor, confirme seu e-mail.';
+
+        return msg || 'Ocorreu um erro inesperado.';
+    };
+
+    const validateForm = () => {
+        if (!email.includes('@')) {
+            setMessage({ type: 'error', text: 'Por favor, insira um e-mail válido.' });
+            return false;
+        }
+        if (password.length < 6) {
+            setMessage({ type: 'error', text: 'A senha deve ter pelo menos 6 caracteres.' });
+            return false;
+        }
+        return true;
+    };
+
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage(null);
+
+        if (!validateForm()) {
+            setLoading(false);
+            return;
+        }
 
         try {
             if (mode === 'signup') {
@@ -33,9 +62,7 @@ export default function AuthForm() {
                 window.location.href = '/puzzles';
             }
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message });
-        } finally {
-            setLoading(false);
+            setMessage({ type: 'error', text: getErrorMessage(error) });
         }
     };
 
@@ -46,10 +73,10 @@ export default function AuthForm() {
             className="w-full max-w-md zen-card p-12 bg-background space-y-8"
         >
             <header className="text-center space-y-2">
-                <div className="text-4xl font-serif text-foreground select-none">
+                <div className="text-4xl font-serif text-foreground select-none" data-testid="auth-title">
                     {mode === 'login' ? 'Entre' : 'Junte-se'}
                 </div>
-                <p className="text-foreground/40 text-sm tracking-widest uppercase font-sans">
+                <p className="text-foreground/70 text-sm tracking-widest uppercase font-sans">
                     {mode === 'login' ? 'Bem-vindo de volta' : 'Crie sua jornada'}
                 </p>
             </header>
@@ -76,11 +103,12 @@ export default function AuthForm() {
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full bg-foreground/5 border zen-border px-4 py-3 outline-none focus:bg-white transition-colors font-sans"
                         placeholder="••••••••"
+                        data-testid="password-input"
                     />
                 </div>
 
                 {message && (
-                    <p className={`text-sm text-center font-serif ${message.type === 'error' ? 'text-accent' : 'text-green-600'}`}>
+                    <p className={`text-sm text-center font-serif ${message.type === 'error' ? 'text-accent' : 'text-green-600'}`} data-testid="auth-message">
                         {message.text}
                     </p>
                 )}
@@ -89,6 +117,7 @@ export default function AuthForm() {
                     type="submit"
                     disabled={loading}
                     className="w-full zen-card py-4 font-serif text-xl text-[#1A1A1A] hover:bg-foreground hover:text-white transition-all disabled:opacity-50"
+                    data-testid="submit-button"
                 >
                     {loading ? 'Processando...' : mode === 'login' ? 'Entrar' : 'Cadastrar'}
                 </button>
