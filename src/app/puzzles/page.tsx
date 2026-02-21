@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import Board from '@/components/Board';
 import { motion, AnimatePresence } from 'framer-motion';
+import { INITIAL_PUZZLES } from '@/data/puzzles';
 
 interface Puzzle {
     id: string;
@@ -35,8 +36,11 @@ export default function PuzzlesPage() {
                 .select('*')
                 .order('difficulty', { ascending: true });
 
-            if (!error && data) {
+            if (!error && data && data.length > 0) {
                 setPuzzles(data);
+            } else {
+                // Fallback to initial puzzles if DB is empty
+                setPuzzles(INITIAL_PUZZLES as any);
             }
             setLoading(false);
         }
@@ -45,8 +49,15 @@ export default function PuzzlesPage() {
 
     const currentPuzzle = puzzles[currentPuzzleIndex];
 
-    const handleMove = async (from: { x: number, y: number }, to: { x: number, y: number }) => {
-        const moveStr = `${from.x}${getColumnChar(from.y)}${to.x}${getColumnChar(to.y)}`;
+    const handleMove = async (from: { x: number, y: number } | string, to: { x: number, y: number }) => {
+        let moveStr = '';
+        if (typeof from === 'string') {
+            // Drop move
+            moveStr = `${from}*${to.x}${getColumnChar(to.y)}`;
+        } else {
+            // Normal move
+            moveStr = `${from.x}${getColumnChar(from.y)}${to.x}${getColumnChar(to.y)}`;
+        }
 
         if (currentPuzzle.solution.includes(moveStr)) {
             setStatus('success');
@@ -105,7 +116,8 @@ export default function PuzzlesPage() {
                 <div className="relative">
                     <Board
                         initialSfen={currentPuzzle.sfen}
-                        onMove={handleMove}
+                        onMove={(from, to) => handleMove(from, to)}
+                        onDrop={(kind, to) => handleMove(kind, to)}
                     />
 
                     <AnimatePresence>
@@ -135,7 +147,7 @@ export default function PuzzlesPage() {
                     <div className="space-y-4">
                         <h3 className="text-xs uppercase tracking-widest text-foreground/40 font-bold">Dica</h3>
                         <p className="text-lg text-foreground/80 font-serif leading-relaxed italic">
-                            "O movimento sutil muitas vezes decide o destino do Rei."
+                            {currentPuzzle.hint || "O movimento sutil muitas vezes decide o destino do Rei."}
                         </p>
                     </div>
 

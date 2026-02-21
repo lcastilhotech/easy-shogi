@@ -14,11 +14,13 @@ interface BoardProps {
     initialSfen?: string;
     onMove?: (from: { x: number, y: number }, to: { x: number, y: number }) => void;
     interactive?: boolean;
+    onDrop?: (pieceKind: string, to: { x: number, y: number }) => void;
 }
 
 export default function Board({ initialSfen, onMove, interactive = true }: BoardProps) {
     const [engine, setEngine] = useState<ShogiEngine | null>(null);
     const [selected, setSelected] = useState<{ x: number, y: number } | null>(null);
+    const [selectedHand, setSelectedHand] = useState<{ kind: string, color: number } | null>(null);
 
     useEffect(() => {
         setEngine(new ShogiEngine(initialSfen));
@@ -27,9 +29,22 @@ export default function Board({ initialSfen, onMove, interactive = true }: Board
     if (!engine) return null;
 
     const board = engine.getBoard();
+    const blackHand = engine.getHandSummary(0);
+    const whiteHand = engine.getHandSummary(1);
 
     const handleSquareClick = (x: number, y: number) => {
         if (!interactive) return;
+
+        if (selectedHand) {
+            const success = engine.drop(selectedHand.kind, x, y);
+            if (success) {
+                onDrop?.(selectedHand.kind, { x, y });
+                setSelectedHand(null);
+            } else {
+                setSelectedHand(null);
+            }
+            return;
+        }
 
         if (selected) {
             if (selected.x === x && selected.y === y) {
@@ -54,12 +69,30 @@ export default function Board({ initialSfen, onMove, interactive = true }: Board
             const piece = engine.getPieceAt(x, y);
             if (piece) {
                 setSelected({ x, y });
+                setSelectedHand(null);
             }
         }
     };
 
+    const handleHandClick = (kind: string, color: number) => {
+        if (!interactive) return;
+        setSelectedHand({ kind, color });
+        setSelected(null);
+    };
+
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+            {/* White Hand (Top/Opponent) */}
+            <div className="hidden md:flex flex-col gap-2 p-4 zen-card bg-foreground/5 min-h-[200px] w-24">
+                <span className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mb-2">Gote</span>
+                {Object.entries(whiteHand).map(([kind, count]) => count > 0 && (
+                    <div key={kind} className="relative group cursor-not-allowed opacity-50">
+                        <div className="text-xl font-serif rotate-180">{PIECE_DATA[kind]?.kanji || kind}</div>
+                        <span className="absolute -bottom-1 -right-1 text-[10px] font-bold">{count}</span>
+                    </div>
+                ))}
+            </div>
+
             <div className="relative zen-border p-1 bg-foreground/5 shadow-2xl">
                 <div className="grid grid-cols-9 grid-rows-9 gap-px bg-foreground">
                     {Array.from({ length: 9 }).map((_, y) => (
@@ -106,6 +139,26 @@ export default function Board({ initialSfen, onMove, interactive = true }: Board
                         })
                     ))}
                 </div>
+            </div>
+
+            {/* Black Hand (Bottom/Player) */}
+            <div className="flex md:flex-col flex-wrap gap-4 md:gap-2 p-4 zen-card bg-foreground/5 md:min-h-[200px] md:w-24">
+                <span className="text-[10px] uppercase tracking-widest text-foreground/40 font-bold mb-2 w-full md:w-auto">Sente</span>
+                {Object.entries(blackHand).map(([kind, count]) => count > 0 && (
+                    <div
+                        key={kind}
+                        onClick={() => handleHandClick(kind, 0)}
+                        className={cn(
+                            "relative cursor-pointer transition-all hover:scale-110",
+                            selectedHand?.kind === kind && "scale-125 text-accent ink-bleed"
+                        )}
+                    >
+                        <div className="text-2xl md:text-3xl font-serif">{PIECE_DATA[kind]?.kanji || kind}</div>
+                        <span className="absolute -bottom-1 -right-1 bg-accent text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                            {count}
+                        </span>
+                    </div>
+                ))}
             </div>
         </div>
     );

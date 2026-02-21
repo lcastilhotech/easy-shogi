@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
 
     // Redirect /login to /puzzles if already logged in
     if (user && request.nextUrl.pathname === '/login') {
-        return NextResponse.redirect(new URL('/puzzles', request.url))
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
     return response

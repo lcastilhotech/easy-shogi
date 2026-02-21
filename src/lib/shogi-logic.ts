@@ -58,4 +58,25 @@ export class ShogiEngine {
     getSFEN() {
         return this.game.toSFENString();
     }
+
+    getHandSummary(color: 0 | 1) {
+        return this.game.getHandsSummary(color);
+    }
+
+    drop(pieceKind: string, toX: number, toY: number) {
+        try {
+            // shogi.js Kind is internal, we need to map our string symbols if necessary
+            // or just pass through if its already Kind strings like "FU", "GI", etc.
+            // Based on d.ts, it expects Kind.
+            this.game.drop(toX, toY, pieceKind as any);
+            return true;
+        } catch (e) {
+            console.error('Drop error:', e);
+            return false;
+        }
+    }
+
+    getTurn() {
+        return this.game.turn;
+    }
 }
