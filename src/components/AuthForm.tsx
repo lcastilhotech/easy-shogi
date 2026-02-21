@@ -88,7 +88,7 @@ export default function AuthForm() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full zen-card bg-foreground text-background py-4 font-serif text-xl hover:translate-x-1 hover:translate-y-1 transition-transform disabled:opacity-50"
+                    className="w-full zen-card bg-[#1A1A1A] text-white py-4 font-serif text-xl hover:translate-x-1 hover:translate-y-1 transition-transform disabled:opacity-50"
                 >
                     {loading ? 'Processando...' : mode === 'login' ? 'Entrar' : 'Cadastrar'}
                 </button>
@@ -97,7 +97,7 @@ export default function AuthForm() {
             <div className="text-center">
                 <button
                     onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                    className="text-xs uppercase tracking-tighter text-foreground/40 hover:text-accent transition-colors underline underline-offset-4"
+                    className="text-xs uppercase tracking-tighter text-[#1A1A1A]/60 hover:text-accent font-bold transition-colors underline underline-offset-4"
                 >
                     {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entre'}
                 </button>
