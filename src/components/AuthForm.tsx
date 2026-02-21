@@ -88,7 +88,7 @@ export default function AuthForm() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full zen-card bg-[#1A1A1A] text-white py-4 font-serif text-xl hover:translate-x-1 hover:translate-y-1 transition-transform disabled:opacity-50"
+                    className="w-full zen-card py-4 font-serif text-xl text-[#1A1A1A] hover:bg-foreground hover:text-white transition-all disabled:opacity-50"
                 >
                     {loading ? 'Processando...' : mode === 'login' ? 'Entrar' : 'Cadastrar'}
                 </button>

@@ -56,8 +56,12 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Protect / and /puzzles route
-    if (!user && (request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/puzzles'))) {
+    // Protect /, /puzzles and /enciclopedia routes
+    if (!user && (
+        request.nextUrl.pathname === '/' ||
+        request.nextUrl.pathname.startsWith('/puzzles') ||
+        request.nextUrl.pathname.startsWith('/enciclopedia')
+    )) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
@@ -70,5 +74,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/puzzles/:path*', '/login'],
+    matcher: ['/', '/puzzles/:path*', '/enciclopedia/:path*', '/login'],
 }
